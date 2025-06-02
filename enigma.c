@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // rotors move before the eletrical signal propagates so if it says z it will go through a when you actually press the switch
 // to compile:
@@ -333,6 +334,136 @@ int main() {
   //testComponents();
   testSimpleEncription();
 
+  // defining each rotor and reflector and the plugboard, setting defaults to 1 except notch which is baked in
+  struct rotor *rotor1 = (struct rotor*)malloc(sizeof(struct rotor));
+  memcpy(rotor1->mapping, (int[]){5, 11, 13, 6, 12, 7, 4, 17, 22, 26, 14, 20, 15, 23, 25, 8, 24, 21, 19, 16, 1, 9, 2, 18, 3, 10}, 26 * sizeof(int));
+  rotor1->position = 1;
+  rotor1->ringSetting = 1;
+  rotor1->notch = 25;
+  struct rotor *rotor2 = (struct rotor*)malloc(sizeof(struct rotor));
+  memcpy(rotor2->mapping, (int[]){1, 10, 4, 11, 19, 9, 18, 21, 24, 2, 12, 8, 23, 20, 13, 3, 17, 7, 26, 14, 16, 25, 6, 22, 15, 5}, 26 * sizeof(int));
+  rotor2->position = 1;
+  rotor2->ringSetting = 1;
+  rotor2->notch = 13;
+  struct rotor *rotor3 = (struct rotor*)malloc(sizeof(struct rotor));
+  memcpy(rotor3->mapping, (int[]){2, 4, 6, 8, 10, 12, 3, 16, 18, 20, 24, 22, 26, 14, 25, 5, 9, 23, 7, 1, 11, 13, 21, 19, 17, 15}, 26 * sizeof(int));
+  rotor3->position = 1;
+  rotor3->ringSetting = 1;
+  rotor3->notch = 4;
+
+    // reflector
+  struct reflector * reflector1 = (struct reflector*)malloc(sizeof(struct reflector)); // YRUHQSLDPXNGOKMIEBFZCWVJAT
+  memcpy(reflector1->mapping, (int[]){25, 18, 21, 8, 17, 19, 12, 4, 16, 24, 14, 7, 15, 11, 13, 9, 5, 2, 6, 26, 3, 23, 22, 10, 1, 20}, 26 * sizeof(int));
+
+    //plugboard
+  //struct plugBoard * plugBoard = initPlugBoard((int[]){26,20}, 1); //  int numSwaps = (sizeof(swaps) / sizeof(swaps[0])) / 2; // /2 to get the number of actual iterations
+  struct plugBoard * plugBoard;
+
+  // variables defined by the text file input
+  struct rotor * LRotor = (struct rotor*)malloc(sizeof(struct rotor)); 
+  struct rotor * MRotor = (struct rotor*)malloc(sizeof(struct rotor));
+  struct rotor * RRotor = (struct rotor*)malloc(sizeof(struct rotor));
+  int LPos, MPos, RPos;
+  int LNotch, MNotch, RNotch;
+  int ReflectorInput; 
+  struct plugBoard * PlugboardBuffer;
+  char * Message = (char *)malloc(sizeof(char)*2048); // can change size later
+  
+  FILE *fptr;
+  fptr = fopen("enigma_msg_test.txt", "r");
+  
+  if (fptr) {
+    // Read the file contents
+    printf("file opened\n");
+    
+    char *buffer; // the actual contents
+    size_t bufsize = 4096;
+    size_t characters; //number of characters grabbed
+
+    buffer = (char *)malloc(bufsize * sizeof(char));
+    if( buffer == NULL)
+    {
+        perror("Unable to allocate buffer");
+        exit(1);
+    }
+
+    int lineNum = 0;
+    while (fgets(buffer,bufsize,fptr)){
+      printf("%s", buffer);
+
+      if (lineNum == 0) {
+        char* rotorNums = strtok(buffer, " ");
+        int i = 0;
+        while( rotorNums != NULL) {
+          int rotorNum = atoi(rotorNums);
+          printf("rotorNums %i\n", rotorNum);
+          if (i == 0) {
+            if (rotorNum == 1) {
+              LRotor = memcpy(LRotor, rotor1, sizeof(struct rotor));
+            } else if (rotorNum == 2) {
+              LRotor = memcpy(LRotor, rotor2, sizeof(struct rotor));
+            } else if (rotorNum == 3) {
+              LRotor = memcpy(LRotor, rotor3, sizeof(struct rotor));
+            }
+          }
+          if (i == 1) {
+            if (rotorNum == 1) {
+              MRotor = memcpy(MRotor, rotor1, sizeof(struct rotor));
+            } else if (rotorNum == 2) {
+              MRotor = memcpy(MRotor, rotor2, sizeof(struct rotor));
+            } else if (rotorNum == 3) {
+              MRotor = memcpy(MRotor, rotor3, sizeof(struct rotor));
+            }
+          }
+          if (i == 2) {
+            if (rotorNum == 1) {
+              RRotor = memcpy(RRotor, rotor1, sizeof(struct rotor));
+            } else if (rotorNum == 2) {
+              RRotor = memcpy(RRotor, rotor2, sizeof(struct rotor));;
+            } else if (rotorNum == 3) {
+              RRotor = memcpy(RRotor, rotor3, sizeof(struct rotor));;
+            }
+          }
+          rotorNums = strtok(NULL, " ");
+          i += 1;
+        }
+        free(rotorNums);
+      }
+
+      if (lineNum == 1) { }
+  
+      printf("lineNum %i \n", lineNum);
+      lineNum += 1;
+    }
+
+    fclose(fptr);
+
+    printf("\n\ndone reading file \n\n");
+    free(buffer);
+  } else {
+      printf("Error opening file\n\n");
+  }
+
+  // reading state of the enigma machine
+  printf("rotor1(position, ringSetting, notch): %i, %i, %i\n", rotor1->position, rotor1->ringSetting, rotor1->notch);
+  printf("rotor2(position, ringSetting, notch): %i, %i, %i\n", rotor2->position, rotor2->ringSetting, rotor2->notch);
+  printf("rotor3(position, ringSetting, notch): %i, %i, %i\n", rotor3->position, rotor3->ringSetting, rotor3->notch);
+  printf("LRotor(position, ringSetting, notch): %i, %i, %i\n", LRotor->position, LRotor->ringSetting, LRotor->notch);
+  printf("MRotor(position, ringSetting, notch): %i, %i, %i\n", MRotor->position, MRotor->ringSetting, MRotor->notch);
+  printf("RRotor(position, ringSetting, notch): %i, %i, %i\n", RRotor->position, RRotor->ringSetting, RRotor->notch);
+  //printf("");
+
+  printf("\n");
   //exit
+
+  free(rotor1);
+  free(rotor2);
+  free(rotor3);
+  free(plugBoard);
+  free(reflector1);
+  free(Message);
+  free(LRotor);
+  free(MRotor);
+  free(RRotor);
   return 0;
 }
