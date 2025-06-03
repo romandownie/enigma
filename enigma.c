@@ -85,14 +85,22 @@ void stepRotors(struct rotor * l, struct rotor * m, struct rotor * r) {
 
   //left
   //printf("r notch to position: %d\n", (((r->notch + (r->ringSetting - 1)) - 8)%26 + 26)%26);
-  if (m->position == (((m->notch + (m->ringSetting - 1)) - 8)%26 + 26)%26) {
+  if (m->position == ((((m->notch + (m->ringSetting - 1)) + 18)%26 + 26) + 26 - m->ringSetting + 1)%26) {
     leftStep = true;
   }
   //middle
-  if (r->position == (((r->notch + (r->ringSetting - 1)) - 8)%26 + 26)%26) {
+  //printf("rturnover %i", (((r->notch + (r->ringSetting - 1)) - 8)%26 + 26)%26);
+  if (r->position == ((((r->notch + (r->ringSetting - 1)) + 18)%26 + 26) + 26 - r->ringSetting + 1)%26) {
     middleStep = true;
   }
 
+  // covering the case where it's 0
+  if ((((m->notch + (m->ringSetting - 1)) + 18)%26 + 26)%26 == 0 && m->position + m->ringSetting - 1 == 26) {
+    leftStep = true;
+  }
+  if ((((r->notch + (r->ringSetting - 1)) + 18)%26 + 26)%26 == 0 && r->position + r->ringSetting - 1 == 26) {
+    middleStep = true;
+  }
   // have to figure out if each is gonna step before actually stepping because it happens in parallel
   if (leftStep) {
     middleStep = true; //middle steps when left steps
@@ -380,7 +388,7 @@ int main() {
     printf("file opened\n");
     
     char *buffer; // the actual contents
-    size_t bufsize = 4096;
+    size_t bufsize = 8192;
     size_t characters; //number of characters grabbed
 
     buffer = (char *)malloc(bufsize * sizeof(char));
@@ -456,16 +464,44 @@ int main() {
       }
       
       if (lineNum == 2) {
+        printf("buffer: %s", buffer);
+        char* ringNums = strtok(buffer, " ");
+        i = 0;
+        while( ringNums != NULL) { 
+          printf("ringNums iter %s\n", ringNums);
+          printf("got here %i", i);
+
+          int ringNum = atoi(ringNums);
+          printf("ringNum: %i\n", ringNum);
+          if (i == 0) {
+            LRotor->ringSetting = ringNum;
+          }
+          if (i == 1) {
+            MRotor->ringSetting = ringNum;
+          }
+          if (i == 2) {
+            RRotor->ringSetting = ringNum;
+          }
+
+          ringNums = strtok(NULL, " ");
+          
+          i += 1;
+        free(ringNums);
+        }
+      }
+
+      if (lineNum == 3) {
         if (atoi(buffer) == 1) {
           ReflectorInput = memcpy(ReflectorInput, reflector1, sizeof(struct reflector));
         }
       }
 
-      if (lineNum == 3) {
+      if (lineNum == 4) {
+        printf("buffer: %s", buffer);
         numSwapsIn = atoi(buffer);
       }
 
-      if (lineNum == 4) {
+      if (lineNum == 5) {
 
         char* plugNums = strtok(buffer, " ");
         i = 0;
@@ -482,7 +518,7 @@ int main() {
         plugBoard = initPlugBoard(tempPlug, numSwapsIn);
       }
 
-      if (lineNum == 5) {
+      if (lineNum == 6) {
         // message -64 to turn from ascii to numbers
         // message HAS TO BE CAPS for ascii conversion to work
         i = 0;
@@ -542,9 +578,10 @@ int main() {
   // testing output from automated input from file
   printf("begin message decryted from file: \n\n\t");
   for(int i = 0; i < 30; i++) {
+    //printf("\nrotor positions: %i, %i, %i\n", LRotor->position, MRotor->position, RRotor->position);
     stepRotors(LRotor, MRotor, RRotor);
     //printf("rotors positions: %d, %d, %d\n", LRotor->position, MRotor->position, RRotor->position);
-    int letter = searchPlugBoard(plugBoard, 26);
+    int letter = searchPlugBoard(plugBoard, Message[i]);
 
     letter = readRotorFwd(letter, RRotor);
     letter = readRotorFwd(letter, MRotor);
