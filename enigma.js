@@ -39,7 +39,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\roman\AppData\Local\Temp\tmplakju3q6.js
+// include: C:\Users\roman\AppData\Local\Temp\tmp2o_djhcb.js
 
   if (!Module['expectedDataFileDownloads']) {
     Module['expectedDataFileDownloads'] = 0;
@@ -215,25 +215,25 @@ var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
     }
 
     }
-    loadPackage({"files": [{"filename": "/enigma_msg_test.txt", "start": 0, "end": 36}], "remote_package_size": 36});
+    loadPackage({"files": [{"filename": "/enigma_msg_test.txt", "start": 0, "end": 58}], "remote_package_size": 58});
 
   })();
 
-// end include: C:\Users\roman\AppData\Local\Temp\tmplakju3q6.js
-// include: C:\Users\roman\AppData\Local\Temp\tmppwi7ynsq.js
+// end include: C:\Users\roman\AppData\Local\Temp\tmp2o_djhcb.js
+// include: C:\Users\roman\AppData\Local\Temp\tmp7t3z__pq.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\roman\AppData\Local\Temp\tmppwi7ynsq.js
-// include: C:\Users\roman\AppData\Local\Temp\tmp8dj9cicv.js
+  // end include: C:\Users\roman\AppData\Local\Temp\tmp7t3z__pq.js
+// include: C:\Users\roman\AppData\Local\Temp\tmp3jzosvnm.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\roman\AppData\Local\Temp\tmp8dj9cicv.js
+  // end include: C:\Users\roman\AppData\Local\Temp\tmp3jzosvnm.js
 
 
 // Sometimes an existing Module object exists with properties

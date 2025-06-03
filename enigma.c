@@ -365,9 +365,12 @@ int main() {
   struct rotor * RRotor = (struct rotor*)malloc(sizeof(struct rotor));
   int LPos, MPos, RPos;
   int LNotch, MNotch, RNotch;
-  int ReflectorInput; 
+  struct reflector * ReflectorInput = (struct reflector*)malloc(sizeof(struct reflector)); 
   struct plugBoard * PlugboardBuffer;
-  char * Message = (char *)malloc(sizeof(char)*2048); // can change size later
+  int * Message = (int *)malloc(sizeof(int)*2048); // can change size later
+  int numSwapsIn;
+  int tempPlug[26];
+  int msgLen = 0;
   
   FILE *fptr;
   fptr = fopen("enigma_msg_test.txt", "r");
@@ -390,10 +393,10 @@ int main() {
     int lineNum = 0;
     while (fgets(buffer,bufsize,fptr)){
       printf("%s", buffer);
-
+      int i = 0;
       if (lineNum == 0) {
         char* rotorNums = strtok(buffer, " ");
-        int i = 0;
+        i = 0;
         while( rotorNums != NULL) {
           int rotorNum = atoi(rotorNums);
           printf("rotorNums %i\n", rotorNum);
@@ -430,9 +433,70 @@ int main() {
         free(rotorNums);
       }
 
-      if (lineNum == 1) { }
-  
-      printf("lineNum %i \n", lineNum);
+      if (lineNum == 1) { 
+        char* posNums = strtok(buffer, " ");
+        i = 0;
+        while( posNums != NULL) { 
+          int posNum = atoi(posNums);
+          printf("posNum: %i\n", posNum);
+          if (i == 0) {
+            LRotor->position = posNum;
+          }
+          if (i == 1) {
+            MRotor->position = posNum;
+          }
+          if (i == 2) {
+            RRotor->position = posNum;
+          }
+
+          posNums = strtok(NULL, " ");
+          i += 1;
+        free(posNums);
+        }
+      }
+      
+      if (lineNum == 2) {
+        if (atoi(buffer) == 1) {
+          ReflectorInput = memcpy(ReflectorInput, reflector1, sizeof(struct reflector));
+        }
+      }
+
+      if (lineNum == 3) {
+        numSwapsIn = atoi(buffer);
+      }
+
+      if (lineNum == 4) {
+
+        char* plugNums = strtok(buffer, " ");
+        i = 0;
+        while (plugNums != NULL) {
+          int plugNum = atoi(plugNums);
+          tempPlug[i] = plugNum;
+          i += 1;
+          if (i > (numSwapsIn * 2)) {
+            break;
+          }
+          plugNums = strtok(NULL, " ");
+        }
+
+        plugBoard = initPlugBoard(tempPlug, numSwapsIn);
+      }
+
+      if (lineNum == 5) {
+        // message -64 to turn from ascii to numbers
+        // message HAS TO BE CAPS for ascii conversion to work
+        i = 0;
+        char * buffCpy = buffer;
+        while(*buffCpy != '\0' && *buffCpy != '\n') {
+          //printf("*buffCpy: %c\n", *buffCpy);
+          Message[i] = *buffCpy - 64;
+          ++buffCpy;
+          i += 1;
+        }
+        msgLen = i + 1;
+        
+      }
+
       lineNum += 1;
     }
 
@@ -451,9 +515,56 @@ int main() {
   printf("LRotor(position, ringSetting, notch): %i, %i, %i\n", LRotor->position, LRotor->ringSetting, LRotor->notch);
   printf("MRotor(position, ringSetting, notch): %i, %i, %i\n", MRotor->position, MRotor->ringSetting, MRotor->notch);
   printf("RRotor(position, ringSetting, notch): %i, %i, %i\n", RRotor->position, RRotor->ringSetting, RRotor->notch);
-  //printf("");
+  printf("reflector1->mapping[0]: %i\n", reflector1->mapping[0]);
+  printf("ReflectorInput->mapping[0]: %i\n", ReflectorInput->mapping[0]);
+  printf("numSwapsIn: %i", numSwapsIn);
+  printf("tempPlug: {");
+  for (int i = 0; i < 26; i++) {
+    printf("%i, ", tempPlug[i]);
+  }
+  printf("}\n");
+
+  printf("plugBoard->mapping: {");
+  for (int i = 0; i < 26; i++) {
+    printf("%i, ", plugBoard->mapping[i]);
+  }
+  printf("}\n");
+
+  printf("Message: {");
+  for (int i = 0; i < 30; i++) {
+    printf("%i, ", Message[i]);
+  }
+  printf("}\n");
 
   printf("\n");
+
+
+  // testing output from automated input from file
+  printf("begin message decryted from file: \n\n\t");
+  for(int i = 0; i < 30; i++) {
+    stepRotors(LRotor, MRotor, RRotor);
+    //printf("rotors positions: %d, %d, %d\n", LRotor->position, MRotor->position, RRotor->position);
+    int letter = searchPlugBoard(plugBoard, 26);
+
+    letter = readRotorFwd(letter, RRotor);
+    letter = readRotorFwd(letter, MRotor);
+    letter = readRotorFwd(letter, LRotor);
+    
+    letter = readReflector(ReflectorInput, letter);
+
+    letter = readRotorBwd(letter, LRotor);
+    letter = readRotorBwd(letter, MRotor);
+    letter = readRotorBwd(letter, RRotor);
+
+    letter = searchPlugBoard(plugBoard, letter);
+
+    printf("%c", letter+64);// turning to ascii
+    if((i + 1)%5 == 0){
+      printf(" ");
+    }
+  }
+  printf("\n\nfinished decryption from file\n\n");
+
   //exit
 
   free(rotor1);
