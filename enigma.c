@@ -459,8 +459,9 @@ int main() {
 
           posNums = strtok(NULL, " ");
           i += 1;
-        free(posNums);
+        
         }
+        free(posNums);
       }
       
       if (lineNum == 2) {
@@ -469,7 +470,7 @@ int main() {
         i = 0;
         while( ringNums != NULL) { 
           printf("ringNums iter %s\n", ringNums);
-          printf("got here %i", i);
+          // printf("got here %i\n", i);
 
           int ringNum = atoi(ringNums);
           printf("ringNum: %i\n", ringNum);
@@ -481,13 +482,14 @@ int main() {
           }
           if (i == 2) {
             RRotor->ringSetting = ringNum;
+            printf("rrotor ring %i\n", ringNum);
           }
 
           ringNums = strtok(NULL, " ");
           
           i += 1;
-        free(ringNums);
         }
+        free(ringNums);
       }
 
       if (lineNum == 3) {
